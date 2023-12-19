@@ -11,7 +11,7 @@
 
     formatScan: .asciz "%ld"
     formatPrint: .asciz "%ld "
-    debug: .asciz "%ld\n"
+    debug: .asciz "%ld\n" #may the Lord have mercy on me
     newLine: .asciz "\n"
 .text
 
@@ -19,13 +19,13 @@
 .global main
 main:
 
-    # Read
-    pushl $m                 
+    # Read m, n, p (yes, I swapped n and m, you monsters) 
+    pushl $n        
     pushl $formatScan               
     call scanf                 
     addl $8, %esp
 
-    pushl $n                 
+    pushl $m                 
     pushl $formatScan               
     call scanf                 
     addl $8, %esp
@@ -45,20 +45,21 @@ main:
 
 
 read_loop:
+    #input (x, y) as the live coordinates. 
+    #toDo: a[x][y]=1
+
     cmpl %edi, p
     je cleanup
 
     pushl $x
     pushl $formatScan
     call scanf
-    popl %ecx
-    popl %ecx 
+    addl $8, %esp
 
     pushl $y
     pushl $formatScan
     call scanf
-    popl %ecx
-    popl %ecx 
+    addl $8, %esp 
 
     addl $1, %edi
     jmp read_loop
@@ -69,14 +70,19 @@ cleanup:
     xorl %ecx, %ecx
     xorl %ebx, %ebx
     xorl %eax, %eax
-
+    #no idea if this helps, got lost in debugging
+    #hope I'll remember deleting this to check if it works
+    
 
 solve:
+    #I'm throwing up so hard rn
 
 
 write:
-    movl $0, i
+    #output matrix, stolen from cs.unibuc.ro/~crusu/asc/labs.html
+    #hope this doesn't count as plagiarism
 
+    movl $0, i
     for_line:
         movl i, %ecx
         cmp %ecx, n
@@ -103,7 +109,9 @@ write:
             call printf
             addl $8, %esp
 
-
+            pushl $0
+            call fflush
+            addl $4, %esp
 
             incl j
             jmp for_column
