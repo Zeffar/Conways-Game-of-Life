@@ -12,21 +12,27 @@ int main()
     f>>n>>m>>p;
     while(p--)
     {
-        f>>x>>y;
+        f>>x>>y; ++x; ++y;
         a[x][y]=b[x][y]=1;
     }
+
+    // for(int i=0; i<=n+1; ++i)
+    // {
+    //     for(int j=0; j<=m+1; ++j)
+    //         cout<<a[i][j]<<" ";
+    //     cout<<'\n';
+    // }    
 
     f>>k;
     while(k--)
     {
-        for(int i=0; i<n; ++i)
-            for(int j=0; j<m; ++j)
+        for(int i=1; i<=n; ++i)
+            for(int j=1; j<=m; ++j)
             {
                 int cnt=0;
                 for(int k=0; k<8; ++k)
                 {
                     x=i+dx[k]; y=j+dy[k];
-                    if(x<0 || x>18 || y<0 || y>18) continue;
                     if(a[x][y]) cnt++;
                 }
 
@@ -34,14 +40,14 @@ int main()
                 if(cnt == 3) b[i][j]=1;
             }
 
-        for(int i=0; i<n; ++i)
-            for(int j=0; j<m; ++j)
+        for(int i=1; i<=n; ++i)
+            for(int j=1; j<=m; ++j)
                 a[i][j]=b[i][j]; 
     }
 
-    for(int i=0; i<n; ++i)
+    for(int i=1; i<=n; ++i)
     {
-        for(int j=0; j<m; ++j)
+        for(int j=1; j<=m; ++j)
             cout<<a[i][j]<<" ";
         cout<<'\n';
     }    
