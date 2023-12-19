@@ -6,17 +6,19 @@
     y: .space 4
     k: .space 4
     a: .space 400
+    b: .space 400
     i: .space 4
     j: .space 4
+    cnt: .space 4
     dir: .space 4
+    dx: .long 0, 1, 0, -1, 1, 1, -1, -1
+    dy: .long 1, 0, -1, 0, 1, -1, 1, -1
 
     formatScan: .asciz "%ld"
     formatPrint: .asciz "%ld "
     debug: .asciz "%ld\n" #may the Lord have mercy on me
     newLine: .asciz "\n"
 .text
-
-
 .global main
 main:
 
@@ -94,10 +96,11 @@ solve:
     call scanf
     addl $8, %esp
 
+    #I hope the skelly is right, hot damn
     for_k:
 
         movl k, %ecx
-        cmp %ecx, $0
+        cmp $0, %ecx
         je write
 
         movl $0, i
@@ -113,7 +116,30 @@ solve:
                 je incCol
 
                 movl $0, dir
+                movl $0, cnt
                 directions:
+                    movl dir, %ecx
+                    cmp $8, %ecx
+                    je incDir
+
+                    lea dx, %edi
+                    movl dir, %ecx
+                    movl (%edi, %ecx, 4), %eax
+                    addl i, %eax
+                    #%eax = i + dx[dir] 
+
+                    lea dy, %edi
+                    movl (%edi, %ecx, 4), %ebx
+                    addl j, %ebx
+                    # %ebx = j + dy[dir]
+
+                    # if (a[%eax][%ebx] != 0) cnt++
+
+                    incl dir
+                    jmp directions
+
+                # if(cnt<2 || cnt>3) b[i][j] = 0;
+                # if(cnt == 3) b[i][j]=1;
             
             incDir:
 
@@ -126,9 +152,8 @@ solve:
 
 
 write:
-    #output matrix, stolen from cs.unibuc.ro/~crusu/asc/labs.html
-    #hope this doesn't count as plagiarism
-
+    #output matrix
+    
     movl $0, i
     for_line:
         movl i, %ecx
