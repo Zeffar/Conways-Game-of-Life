@@ -5,9 +5,10 @@
     x: .space 4
     y: .space 4
     k: .space 4
-    a: .space 325
+    a: .space 400
     i: .space 4
     j: .space 4
+    dir: .space 4
 
     formatScan: .asciz "%ld"
     formatPrint: .asciz "%ld "
@@ -38,17 +39,17 @@ main:
 
 
     cmpl $0, p
-        je write 
+        je cleanup 
 
-    movl $0, %edi
+    movl $0, k
 
 
 
 read_loop:
     #input (x, y) as the live coordinates. 
-    #toDo: a[x][y]=1
 
-    cmpl %edi, p
+    movl k, %ecx
+    cmpl %ecx, p
     je cleanup
 
     pushl $x
@@ -61,21 +62,67 @@ read_loop:
     call scanf
     addl $8, %esp 
 
-    addl $1, %edi
+
+    movl x, %eax
+    xorl %edx, %edx
+    mull m
+    addl y, %eax
+    # %eax = x * nr_coloane + y
+    leal a, %edi
+    movl $1, (%edi, %eax, 4)
+
+    incl k
     jmp read_loop
 
 
 cleanup:
     xorl %edi, %edi
+    xorl %edx, %edx
     xorl %ecx, %ecx
     xorl %ebx, %ebx
     xorl %eax, %eax
+    movl $0, k
     #no idea if this helps, got lost in debugging
     #hope I'll remember deleting this to check if it works
     
 
-solve:
+solve: 
     #I'm throwing up so hard rn
+
+    pushl $k
+    pushl $formatScan
+    call scanf
+    addl $8, %esp
+
+    for_k:
+
+        movl k, %ecx
+        cmp %ecx, $0
+        je write
+
+        movl $0, i
+        lines:
+            mov i, %ecx
+            cmp %ecx, n
+            je incLin
+
+            movl $0, j
+            columns:
+                mov j, %ecx
+                cmp %ecx, m
+                je incCol
+
+                movl $0, dir
+                directions:
+            
+            incDir:
+
+        incCol:
+
+    incLin:
+
+
+    
 
 
 write:
@@ -97,9 +144,10 @@ write:
             #print a[i][j]
             movl i, %eax
             movl $0, %edx
-            mull n
+            mull m
             addl j, %eax
             #eax = i*n+j
+
 
             lea a, %edi
             movl (%edi, %eax, 4), %ebx
