@@ -15,14 +15,6 @@ int main()
         f>>x>>y; ++x; ++y;
         a[x][y]=b[x][y]=1;
     }
-
-    // for(int i=0; i<=n+1; ++i)
-    // {
-    //     for(int j=0; j<=m+1; ++j)
-    //         cout<<a[i][j]<<" ";
-    //     cout<<'\n';
-    // }    
-
     f>>k;
     while(k--)
     {
