@@ -1,6 +1,6 @@
 .data
 x: .long 4           # Reserves 4 bytes of space for the variable x
-format: .asciz "x are valoarea: %d\n" # Defines a format string for printf
+format: .asciz "x are valoarea: %ld\n" # Defines a format string for printf
 
 .text
 .global main
