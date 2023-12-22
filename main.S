@@ -226,25 +226,6 @@ solve:
                     #tooDo if (cnt>3) b[i][j] = 0;
 
                 decision3:
-                    
-                    # pushl i
-                    # pushl $formatPrint
-                    # call printf
-                    # popl %ecx
-                    # popl %ecx
-                    
-                    # pushl j
-                    # pushl $formatPrint
-                    # call printf
-                    # popl %ecx
-                    # popl %ecx
-
-                    # pushl cnt
-                    # pushl $debug
-                    # call printf
-                    # popl %ecx
-                    # popl %ecx
-
                     movl cnt, %ecx
                     cmpl $3, %ecx
                         je birth_b
@@ -266,13 +247,34 @@ solve:
             cmpl n, %ecx
                 jg incTurn
             movl $1, j
+
             forJ:
                 movl j, %ecx
                 cmpl m, %ecx
                     jg increment
                 # a[i][j] = b[i][j]
-                
 
+                movl i, %eax
+                xorl %edx, %edx
+                movl m, %ebx
+                addl $2, %ebx 
+                mull %ebx
+                addl j, %eax
+                # %eax = x * nr_coloane + y
+                leal b, %edi
+                movl (%edi, %eax, 4), %ebp
+                
+                movl i, %eax
+                xorl %edx, %edx
+                movl m, %ebx
+                addl $2, %ebx 
+                mull %ebx
+                addl j, %eax
+                leal a, %edi
+                movl %ebp, (%edi, %eax, 4)
+
+                incl j  
+                jmp forJ
 
             increment:
                 incl i
@@ -320,17 +322,15 @@ birth_b:
 write:
     #output matrix
     
-    movl $0, i
+    movl $1, i
     for_line:
         movl i, %ecx
-        subl $1, %ecx
         cmpl n, %ecx
         jg exit
 
-        movl $0, j
+        movl $1, j
         for_column:
             movl j, %ecx
-            subl $1, %ecx
             cmpl m, %ecx
             jg cont
 
