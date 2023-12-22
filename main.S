@@ -9,6 +9,7 @@
     b: .space 400
     i: .space 4
     j: .space 4
+    turn: .space 4
     cnt: .space 4
     dir: .space 4
     dx: .long 0, 1, 0, -1, 1, 1, -1, -1
@@ -16,7 +17,7 @@
 
     formatScan: .asciz "%ld"
     formatPrint: .asciz "%ld "
-    debug: .asciz "%ld\n" #may the Lord have mercy on me
+    debug: .asciz "%ld\n" 
     newLine: .asciz "\n"
 .text
 .global main
@@ -26,19 +27,21 @@ main:
     pushl $n        
     pushl $formatScan               
     call scanf                 
-    addl $8, %esp
+    popl %ecx
+    popl %ecx
+    
 
     pushl $m                 
     pushl $formatScan               
     call scanf                 
-    addl $8, %esp
+    popl %ecx
+    popl %ecx
 
     pushl $p                
     pushl $formatScan               
     call scanf                 
-    addl $8, %esp
-
-
+    popl %ecx
+    popl %ecx
 
     cmpl $0, p
         je cleanup 
@@ -57,21 +60,34 @@ read_loop:
     pushl $x
     pushl $formatScan
     call scanf
-    addl $8, %esp
+    popl %ecx
+    popl %ecx
 
     pushl $y
     pushl $formatScan
     call scanf
-    addl $8, %esp 
+    popl %ecx
+    popl %ecx
+    
 
 
     movl x, %eax
+    incl %eax
     xorl %edx, %edx
-    mull m
+    movl m, %ebx
+    addl $2, %ebx 
+    mull %ebx
     addl y, %eax
+    incl %eax
+    
+
     # %eax = x * nr_coloane + y
-    leal a, %edi
+    lea a, %edi
     movl $1, (%edi, %eax, 4)
+    # now a[x][y]=1
+    leal b, %edi
+    movl $1, (%edi, %eax, 4)
+    # now b[x][y]=1
 
     incl k
     jmp read_loop
@@ -94,62 +110,192 @@ solve:
     pushl $k
     pushl $formatScan
     call scanf
-    addl $8, %esp
-
+    popl %ecx
+    popl %ecx
+    
+    movl k, %ecx
+    cmp $0, %ecx
+        je write
+        
+    movl $0, turn
     #I hope the skelly is right, hot damn
     for_k:
 
-        movl k, %ecx
-        cmp $0, %ecx
+        movl turn, %ecx
+        cmpl k, %ecx
         je write
 
-        movl $0, i
+        movl $1, i
         lines:
-            mov i, %ecx
-            cmp %ecx, n
-            je incLin
 
-            movl $0, j
+            movl i, %ecx
+            cmpl n, %ecx
+                jg incLin
+
+            movl $1, j
             columns:
-                mov j, %ecx
-                cmp %ecx, m
-                je incCol
+                    
+
+                movl j, %ecx
+                cmpl m, %ecx
+                    jg incCol
 
                 movl $0, dir
                 movl $0, cnt
                 directions:
                     movl dir, %ecx
-                    cmp $8, %ecx
-                    je incDir
+                    cmpl $8, %ecx
+                        je decision1
 
                     lea dx, %edi
                     movl dir, %ecx
-                    movl (%edi, %ecx, 4), %eax
-                    addl i, %eax
+
+                    movl i, %eax
+                    cmpl $0, (%edi, %ecx, 4)
+                        jg incI
+                    cmpl $0, (%edi, %ecx, 4)
+                        jl decI
+                    
+                    jmp contDirI
+
+                    incI:
+                        addl $1, %eax
+                        jmp contDirI
+
+                    decI:
+                        subl $1, %eax
+                        jmp contDirI
+
+
+                    contDirI:
                     #%eax = i + dx[dir] 
 
                     lea dy, %edi
-                    movl (%edi, %ecx, 4), %ebx
-                    addl j, %ebx
-                    # %ebx = j + dy[dir]
+                    movl j, %ebx
+                    cmpl $0, (%edi, %ecx, 4)
+                        jg incJ
+                    cmpl $0, (%edi, %ecx, 4)
+                        jl decJ
+                    
+                    jmp contDirJ
 
-                    # if (a[%eax][%ebx] != 0) cnt++
+                    incJ:
+                        addl $1, %ebx
+                        jmp contDirJ
+
+                    decJ:
+                        subl $1, %ebx
+                        jmp contDirJ
+
+
+                    contDirJ:
+                    # %ebx = j + dy[dir]
+        
+                    # movl %eax, x
+                    # movl %ebx, y
+                    xorl %edx, %edx
+                    movl m, %ecx
+                    addl $2, %ecx
+                    mull %ecx
+                    addl %ebx, %eax
+                    # %eax = %eax * nr_coloane + %ebx
+                    lea a, %edi
+
+                    cmpl $0, (%edi, %eax, 4)
+                        jg et_inc_cnt
+                    #technically, if(a[%eax][%ebx] != 0) cnt++
 
                     incl dir
                     jmp directions
+                    
+                    et_inc_cnt:
+                        incl cnt
+                        incl dir
+                        jmp directions
 
-                # if(cnt<2 || cnt>3) b[i][j] = 0;
-                # if(cnt == 3) b[i][j]=1;
-            
+                decision1:
+                    movl cnt, %ecx
+                    cmpl $2, %ecx
+                        jl kill_b
+                    #tooDo if (cnt<2) b[i][j] = 0;
+
+                decision2:
+                    movl cnt, %ecx
+                    cmpl $3, %ecx
+                        jg kill_b
+                    #tooDo if (cnt>3) b[i][j] = 0;
+
+                decision3:
+                    
+                    # pushl i
+                    # pushl $formatPrint
+                    # call printf
+                    # popl %ecx
+                    # popl %ecx
+                    
+                    # pushl j
+                    # pushl $formatPrint
+                    # call printf
+                    # popl %ecx
+                    # popl %ecx
+
+                    # pushl cnt
+                    # pushl $debug
+                    # call printf
+                    # popl %ecx
+                    # popl %ecx
+
+                    movl cnt, %ecx
+                    cmpl $3, %ecx
+                        je birth_b
+                    #tooDo if(cnt == 3) b[i][j]=1
+
             incDir:
-
+                incl j
+                jmp columns
         incCol:
-
-    incLin:
-
-
+            incl i 
+            jmp lines
     
+    incLin:
+        incl turn
+        jmp for_k
 
+    jmp write
+
+
+
+
+
+kill_b:
+
+    movl i, %eax
+    xorl %edx, %edx
+    movl m, %ebx
+    addl $2, %ebx 
+    mull %ebx
+    addl j, %eax
+    # %eax = x * nr_coloane + y
+    leal b, %edi
+    movl $0, (%edi, %eax, 4)
+    # now b[x][y]=0
+
+    jmp incDir
+
+birth_b:
+
+    movl i, %eax
+    xorl %edx, %edx
+    movl m, %ebx
+    addl $2, %ebx 
+    mull %ebx
+    addl j, %eax
+    # %eax = i * nr_coloane + j
+    leal b, %edi
+    movl $1, (%edi, %eax, 4)
+    # now b[x][y]=1
+
+    jmp incDir
 
 write:
     #output matrix
@@ -157,21 +303,25 @@ write:
     movl $0, i
     for_line:
         movl i, %ecx
-        cmp %ecx, n
-        je exit
+        subl $1, %ecx
+        cmpl n, %ecx
+        jg exit
 
         movl $0, j
         for_column:
             movl j, %ecx
-            cmp %ecx, m
-            je cont
+            subl $1, %ecx
+            cmpl m, %ecx
+            jg cont
 
             #print a[i][j]
             movl i, %eax
             movl $0, %edx
-            mull m
+            movl m, %ebx
+            addl $2, %ebx
+            mull %ebx
             addl j, %eax
-            #eax = i*n+j
+            #eax = i*m+j
 
 
             lea a, %edi
@@ -180,11 +330,13 @@ write:
             pushl %ebx
             pushl $formatPrint
             call printf
-            addl $8, %esp
+            popl %ecx
+            popl %ecx
+    
 
             pushl $0
             call fflush
-            addl $4, %esp
+            popl %ecx
 
             incl j
             jmp for_column
