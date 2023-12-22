@@ -130,7 +130,7 @@ solve:
 
             movl i, %ecx
             cmpl n, %ecx
-                jg incLin
+                jg equalizer
 
             movl $1, j
             columns:
@@ -250,22 +250,42 @@ solve:
                         je birth_b
                     #tooDo if(cnt == 3) b[i][j]=1
 
-            incDir:
-                incl j
-                jmp columns
-        incCol:
-            incl i 
-            jmp lines
-    
-    incLin:
-        incl turn
-        jmp for_k
+                incDir:
+                    incl j
+                    jmp columns
+            incCol:
+                incl i 
+                jmp lines
+
+
+        
+        equalizer:
+        movl $1, i
+        forI:
+            movl i, %ecx
+            cmpl n, %ecx
+                jg incTurn
+            movl $1, j
+            forJ:
+                movl j, %ecx
+                cmpl m, %ecx
+                    jg increment
+                # a[i][j] = b[i][j]
+                
+
+
+            increment:
+                incl i
+                jmp forI
+
+        incTurn:
+            incl turn
+            jmp for_k
+
+
+
 
     jmp write
-
-
-
-
 
 kill_b:
 
